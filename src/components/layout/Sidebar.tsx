@@ -25,6 +25,7 @@ import { useSettingsStore } from '../../stores/settingsStore';
 import type { FileNode } from '../../types/file';
 import { SimilarNotes } from '../feature/SimilarNotes';
 import { WidgetZone } from '../ui/WidgetZone';
+import { Kbd } from '../ui/Kbd';
 
 /* ─────────────────────── Sidebar ─────────────────────── */
 
@@ -160,17 +161,8 @@ function SidebarSearch() {
       >
         <Search size={13} />
         <span>Search notes...</span>
-        <span
-          style={{
-            marginLeft: 'auto',
-            fontSize: '10px',
-            backgroundColor: 'var(--bg-hover)',
-            padding: '1px 5px',
-            borderRadius: '3px',
-            fontFamily: 'var(--font-mono)',
-          }}
-        >
-          ⌘P
+        <span style={{ marginLeft: 'auto' }}>
+          <Kbd>Mod+P</Kbd>
         </span>
       </button>
     </div>
@@ -200,6 +192,14 @@ function SidebarFileTree() {
 
   return (
     <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={async (e) => {
+        e.preventDefault();
+        const srcId = e.dataTransfer.getData('text/plain');
+        if (srcId) {
+          await useFileStore.getState().moveFile(srcId, null);
+        }
+      }}
       style={{
         flex: 1,
         overflowY: 'auto',
@@ -294,6 +294,66 @@ function FileTreeNode({
   const isExpanded = expandedFolders.has(node.id);
   const isFolder = node.type === 'folder';
   const [isHovered, setIsHovered] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(node.name);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const renameFile = useFileStore(s => s.renameFile);
+  const moveFile = useFileStore(s => s.moveFile);
+
+  useEffect(() => {
+    setRenameValue(node.name);
+  }, [node.name]);
+
+  const handleRenameSubmit = async () => {
+    setIsRenaming(false);
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== node.name) {
+      await renameFile(node.id, trimmed);
+    } else {
+      setRenameValue(node.name);
+    }
+  };
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRenameSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsRenaming(false);
+      setRenameValue(node.name);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', node.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (isFolder) {
+      e.preventDefault();
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    if (!isFolder) return;
+
+    const srcId = e.dataTransfer.getData('text/plain');
+    if (srcId && srcId !== node.id) {
+      await moveFile(srcId, node.id);
+    }
+  };
 
   const children = isFolder
     ? (node.children || [])
@@ -311,6 +371,11 @@ function FileTreeNode({
         onClick={() => (isFolder ? onToggleFolder(node.id) : onFileClick(node.id))}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -322,10 +387,14 @@ function FileTreeNode({
           color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
           backgroundColor: isActive
             ? 'var(--accent-glow)'
-            : isHovered
-              ? 'var(--bg-hover)'
-              : 'transparent',
+            : isDragOver
+              ? 'var(--accent-glow)'
+              : isHovered
+                ? 'var(--bg-hover)'
+                : 'transparent',
           borderRight: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+          borderTop: isDragOver ? '1px dashed var(--accent)' : '1px solid transparent',
+          borderBottom: isDragOver ? '1px dashed var(--accent)' : '1px solid transparent',
           transition: 'background-color 100ms ease, color 100ms ease',
           userSelect: 'none',
         }}
@@ -350,16 +419,44 @@ function FileTreeNode({
           <FileText size={14} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
         )}
 
-        <span
-          style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flex: 1,
-          }}
-        >
-          {node.name}
-        </span>
+        {isRenaming ? (
+          <input
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={handleRenameSubmit}
+            onKeyDown={handleRenameKeyDown}
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--accent)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-primary)',
+              fontSize: '13px',
+              padding: '1px 4px',
+              fontFamily: 'var(--font-ui)',
+              outline: 'none',
+              width: '100%',
+            }}
+          />
+        ) : (
+          <span
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setIsRenaming(true);
+            }}
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+            }}
+          >
+            {node.name}
+          </span>
+        )}
       </div>
 
       {/* Render children if expanded folder */}

@@ -15,6 +15,8 @@ import * as Y from 'yjs';
 import { yCollab } from 'y-codemirror.next';
 import { WebrtcProvider } from 'y-webrtc';
 import { usePluginStore } from '../stores/pluginStore';
+import { useEditorStore } from '../stores/editorStore';
+import { debounce } from '../lib/utils';
 
 interface UseCodeMirrorProps {
   initialValue: string;
@@ -33,12 +35,27 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
   const cmExtensionsCompartment = useRef(new Compartment());
   const cmExtensions = usePluginStore(state => state.cmExtensions);
 
+  const debouncedOnChangeRef = useRef<((val: string) => void) | undefined>(undefined);
+
+  useEffect(() => {
+    debouncedOnChangeRef.current = debounce((val: string) => {
+      if (onChange) onChange(val);
+    }, 500);
+  }, [onChange]);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
     const updateListener = EditorView.updateListener.of((update) => {
-      if (!ytext && update.docChanged && onChange) {
-        onChange(update.state.doc.toString());
+      if (update.docChanged) {
+        const newDoc = update.state.doc.toString();
+        // Instantly update the editorStore's activeContent buffer
+        useEditorStore.getState().setActiveContent(newDoc);
+
+        // Save after 500ms pause in typing
+        if (debouncedOnChangeRef.current) {
+          debouncedOnChangeRef.current(newDoc);
+        }
       }
     });
 

@@ -2,21 +2,25 @@ import { type ReactNode } from 'react';
 
 export interface KbdProps {
   /** The shortcut text to display (e.g., "Ctrl+S", "Mod+K") */
-  children: ReactNode;
+  children?: ReactNode;
+  /** Optional platform modifier to auto-render ("mod" -> ⌘/Ctrl) */
+  modifier?: 'mod';
 }
 
 /**
  * Detect macOS for Mod → ⌘ conversion.
  *
  * Uses navigator.userAgentData if available (modern browsers),
- * falling back to navigator.platform for broader compatibility.
+ * falling back to navigator.userAgent and navigator.platform for broader compatibility.
  */
-const isMac: boolean =
+export const isMac: boolean =
   typeof navigator !== 'undefined'
     ? // Modern API
       ('userAgentData' in navigator &&
         (navigator as any).userAgentData?.platform === 'macOS') ||
-      // Legacy fallback
+      // User Agent check (robust)
+      /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ||
+      // Legacy platform check
       /Mac|iPhone|iPad|iPod/i.test(navigator.platform ?? '')
     : false;
 
@@ -41,8 +45,13 @@ function formatShortcut(text: string): string {
  * <Kbd>Shift+Enter</Kbd>
  * ```
  */
-export function Kbd({ children }: KbdProps) {
-  const text = typeof children === 'string' ? formatShortcut(children) : children;
+export function Kbd({ children, modifier }: KbdProps) {
+  let text: ReactNode = children;
+  if (modifier === 'mod') {
+    text = isMac ? '⌘' : 'Ctrl';
+  } else if (typeof children === 'string') {
+    text = formatShortcut(children);
+  }
 
   return (
     <kbd

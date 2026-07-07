@@ -23,7 +23,7 @@ import { useScrollSync } from './hooks/useScrollSync';
 
 function MainEditorArea() {
   const { files, updateContent } = useFileStore();
-  const { activeFileId, openTabs } = useEditorStore();
+  const { activeFileId, openTabs, activeContent } = useEditorStore();
 
   const activeFile = activeFileId ? files[activeFileId] : null;
 
@@ -66,7 +66,7 @@ function MainEditorArea() {
           className="h-full overflow-y-auto bg-[var(--bg-primary)] shrink-0"
           ref={previewRef}
         >
-          <MarkdownPreview content={activeFile.content} />
+          <MarkdownPreview content={activeContent !== null ? activeContent : activeFile.content} />
         </div>
       </div>
       <StatusBar />

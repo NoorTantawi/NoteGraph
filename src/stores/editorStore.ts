@@ -17,6 +17,8 @@ interface EditorState {
   activeFileId: string | null;
   /** Ordered list of open file IDs (tab bar) */
   openTabs: string[];
+  /** The instant un-debounced content buffer for the active file */
+  activeContent: string | null;
   /** Whether the sidebar is expanded */
   sidebarOpen: boolean;
   /** Whether the command palette overlay is visible */
@@ -36,6 +38,8 @@ interface EditorState {
   closeTab: (id: string) => void;
   /** Set the active file without opening a new tab. */
   setActiveFile: (id: string) => void;
+  /** Update the active file content buffer. */
+  setActiveContent: (content: string | null) => void;
   /** Reorder tabs by moving a tab from one index to another. */
   reorderTabs: (fromIndex: number, toIndex: number) => void;
   /** Rename a tab ID (used when FileSystem mode changes file IDs). */
@@ -65,6 +69,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
   /* ---- Initial state ---- */
   activeFileId: null,
   openTabs: [],
+  activeContent: null,
   sidebarOpen: true,
   commandPaletteOpen: false,
   searchPanelOpen: false,
@@ -78,7 +83,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
       const tabs = state.openTabs.includes(id)
         ? state.openTabs
         : [...state.openTabs, id];
-      return { openTabs: tabs, activeFileId: id };
+      return { openTabs: tabs, activeFileId: id, activeContent: null };
     }),
 
   closeTab: (id) =>
@@ -101,11 +106,14 @@ export const useEditorStore = create<EditorState>()((set) => ({
         }
       }
 
-      return { openTabs: tabs, activeFileId: nextActive };
+      return { openTabs: tabs, activeFileId: nextActive, activeContent: null };
     }),
 
   setActiveFile: (id) =>
-    set({ activeFileId: id }),
+    set({ activeFileId: id, activeContent: null }),
+
+  setActiveContent: (content) =>
+    set({ activeContent: content }),
 
   reorderTabs: (fromIndex, toIndex) =>
     set((state) => {
