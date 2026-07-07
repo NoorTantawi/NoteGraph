@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-hover: var(--bg-hover);
+  --color-bg-active: var(--bg-active);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-glow: var(--accent-glow);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+  --font-preview: var(--font-preview);
+}
+
+:root {
+  /* Dark mode (default) */
+  --bg-primary: hsl(225, 25%, 8%);
+  --bg-secondary: hsl(225, 20%, 12%);
+  --bg-tertiary: hsl(225, 18%, 16%);
+  --bg-hover: hsl(225, 15%, 20%);
+  --bg-active: hsl(225, 12%, 24%);
+  --text-primary: hsl(220, 20%, 92%);
+  --text-secondary: hsl(220, 15%, 60%);
+  --text-tertiary: hsl(220, 10%, 40%);
+  --accent: hsl(250, 80%, 65%);
+  --accent-hover: hsl(250, 80%, 72%);
+  --accent-muted: hsl(250, 40%, 35%);
+  --accent-glow: hsla(250, 80%, 65%, 0.15);
+  --border: hsl(225, 15%, 18%);
+  --border-hover: hsl(225, 15%, 25%);
+  --success: hsl(150, 60%, 50%);
+  --warning: hsl(40, 90%, 60%);
+  --danger: hsl(0, 70%, 60%);
+  --scrollbar-track: hsl(225, 20%, 10%);
+  --scrollbar-thumb: hsl(225, 15%, 25%);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-preview: 'Inter', Georgia, serif;
+}
+
+[data-theme='light'] {
+  /* Light mode overrides */
+  --bg-primary: hsl(220, 20%, 97%);
+  --bg-secondary: hsl(220, 15%, 93%);
+  --bg-tertiary: hsl(220, 12%, 89%);
+  --bg-hover: hsl(220, 10%, 85%);
+  --bg-active: hsl(220, 8%, 80%);
+  --text-primary: hsl(225, 25%, 12%);
+  --text-secondary: hsl(225, 15%, 40%);
+  --text-tertiary: hsl(225, 10%, 60%);
+  --accent: hsl(250, 70%, 55%);
+  --accent-hover: hsl(250, 70%, 48%);
+  --accent-muted: hsl(250, 30%, 70%);
+  --accent-glow: hsla(250, 70%, 55%, 0.1);
+  --border: hsl(220, 15%, 85%);
+  --border-hover: hsl(220, 15%, 75%);
+  --scrollbar-track: hsl(220, 10%, 92%);
+  --scrollbar-thumb: hsl(220, 10%, 75%);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Utilities */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent);
+}
+
+.glass-surface {
+  background-color: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+::selection {
+  background-color: var(--accent-glow);
+  color: var(--text-primary);
+}
+
+/* Typography styles for markdown preview */
+.prose {
+  font-family: var(--font-preview);
+  line-height: 1.6;
+  color: var(--text-primary);
+  max-width: 65ch;
+  margin: 0 auto;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.prose h1 { font-size: 2.25em; }
+.prose h2 { font-size: 1.75em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+.prose h3 { font-size: 1.375em; }
+.prose h4 { font-size: 1.125em; }
+
+.prose p { margin-top: 0; margin-bottom: 1em; }
+
+.prose a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.prose a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  color: var(--text-secondary);
+  font-style: italic;
+  background-color: var(--bg-secondary);
+  padding: 0.5em 1em;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-secondary);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+  color: var(--text-primary);
+}
+
+.prose pre {
+  background-color: var(--bg-tertiary);
+  padding: 1em;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.9em;
+  color: inherit;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+.prose th, .prose td {
+  border: 1px solid var(--border);
+  padding: 0.5em 1em;
+  text-align: left;
+}
+.prose th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+.prose ul, .prose ol {
+  margin-top: 0;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1em 0;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+  
+  /* Hide UI elements */
+  header, aside, .tabs, .status-bar, button, .graph-view, .command-palette, .settings-panel {
+    display: none !important;
+  }
+  
+  /* Make the main content take full width */
+  .app-shell, #root, body, html, .flex-1, .h-full, .w-full {
+    height: auto !important;
+    width: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Only print the preview area */
+  .prose {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Page breaks for headings */
+  .prose h1, .prose h2 {
+    page-break-before: auto;
+    page-break-after: avoid;
+  }
+  
+  /* Avoid breaking inside blocks */
+  .prose pre, .prose blockquote, .prose table, .prose img, .mermaid {
+    page-break-inside: avoid;
+  }
+  
+  /* Hide the editor pane */
+  .cm-editor, .splitter-handle {
+    display: none !important;
+  }
+  
+  /* Colors for print */
+  .prose a {
+    color: #0000EE !important;
+    text-decoration: underline !important;
+  }
+  
+  .prose pre {
+    border: 1px solid #ccc !important;
+    background-color: #f9f9f9 !important;
+  }
+}
