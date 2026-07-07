@@ -3,6 +3,7 @@ import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useFileStore } from '../../stores/fileStore';
+import { useEditorStore } from '../../stores/editorStore';
 
 interface NewFileDialogProps {
   isOpen: boolean;
@@ -14,8 +15,9 @@ interface NewFileDialogProps {
 export function NewFileDialog({ isOpen, onClose, parentId, type }: NewFileDialogProps) {
   const [name, setName] = useState('');
   const { createFile, createFolder } = useFileStore();
+  const { openFile } = useEditorStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -24,9 +26,10 @@ export function NewFileDialog({ isOpen, onClose, parentId, type }: NewFileDialog
       if (!finalName.endsWith('.md')) {
         finalName += '.md';
       }
-      createFile({ name: finalName, parentId, type: 'file' });
+      const id = await createFile({ name: finalName, parentId, type: 'file' });
+      openFile(id);
     } else {
-      createFolder({ name: name.trim(), parentId, type: 'folder' });
+      await createFolder({ name: name.trim(), parentId, type: 'folder' });
     }
     
     setName('');

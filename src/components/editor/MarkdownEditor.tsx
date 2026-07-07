@@ -23,6 +23,7 @@ export const MarkdownEditor = memo(function MarkdownEditor({
   const ytext = React.useMemo(() => fileId ? doc.getText(fileId) : undefined, [fileId]);
 
   const { containerRef, view } = useCodeMirror({
+    fileId: fileId || '',
     initialValue: content,
     onChange,
     isDark,

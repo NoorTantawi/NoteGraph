@@ -19,6 +19,7 @@ import { useEditorStore } from '../stores/editorStore';
 import { debounce } from '../lib/utils';
 
 interface UseCodeMirrorProps {
+  fileId: string;
   initialValue: string;
   onChange?: (value: string) => void;
   isDark: boolean;
@@ -27,12 +28,13 @@ interface UseCodeMirrorProps {
   provider?: WebrtcProvider;
 }
 
-export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false, ytext, provider }: UseCodeMirrorProps) {
+export function useCodeMirror({ fileId, initialValue, onChange, isDark, readOnly = false, ytext, provider }: UseCodeMirrorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<EditorView>();
   const themeCompartment = useRef(new Compartment());
   const readOnlyCompartment = useRef(new Compartment());
   const cmExtensionsCompartment = useRef(new Compartment());
+  const yjsCompartment = useRef(new Compartment());
   const cmExtensions = usePluginStore(state => state.cmExtensions);
 
   const debouncedOnChangeRef = useRef<((val: string) => void) | undefined>(undefined);
@@ -85,7 +87,7 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
         updateListener,
         placeholder('Type something brilliant...'),
         EditorView.lineWrapping,
-        ...(ytext && provider ? [yCollab(ytext, provider.awareness)] : []),
+        yjsCompartment.current.of(ytext && provider ? [yCollab(ytext, provider.awareness)] : []),
         cmExtensionsCompartment.current.of(cmExtensions),
       ],
     });
@@ -101,7 +103,7 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
       editorView.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ytext, provider]);
+  }, [fileId]);
 
   // Update theme dynamically
   useEffect(() => {
@@ -129,6 +131,17 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
       });
     }
   }, [readOnly, view]);
+
+  // Update Yjs collaboration dynamically
+  useEffect(() => {
+    if (view) {
+      view.dispatch({
+        effects: yjsCompartment.current.reconfigure(
+          ytext && provider ? [yCollab(ytext, provider.awareness)] : []
+        )
+      });
+    }
+  }, [ytext, provider, view]);
 
   // Note: changing initialValue after mount is handled by checking if doc changed.
   // We use key={id} on the component to avoid this firing for different files.

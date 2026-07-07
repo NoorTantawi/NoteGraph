@@ -26,6 +26,7 @@ import type { FileNode } from '../../types/file';
 import { SimilarNotes } from '../feature/SimilarNotes';
 import { WidgetZone } from '../ui/WidgetZone';
 import { Kbd } from '../ui/Kbd';
+import { NewFileDialog } from '../feature/NewFileDialog';
 
 /* ─────────────────────── Sidebar ─────────────────────── */
 
@@ -172,13 +173,23 @@ function SidebarSearch() {
 /* ─────────────────────── File Tree ─────────────────────── */
 
 function SidebarFileTree() {
-  const files = useFileStore((s) => s.files);
   const rootIds = useFileStore((s) => s.rootIds);
+  const files = useFileStore((s) => s.files);
+  const isLoaded = useFileStore((s) => s.isLoaded);
   const expandedFolders = useFileStore((s) => s.expandedFolders);
   const activeFileId = useEditorStore((s) => s.activeFileId);
   const openFile = useEditorStore((s) => s.openFile);
   const toggleFolder = useFileStore((s) => s.toggleFolder);
-  const createFile = useFileStore((s) => s.createFile);
+
+  const [newDialogState, setNewDialogState] = useState<{
+    isOpen: boolean;
+    type: 'file' | 'folder';
+    parentId: string | null;
+  }>({
+    isOpen: false,
+    type: 'file',
+    parentId: null,
+  });
 
   // Get root-level items
   const rootItems = rootIds
@@ -230,12 +241,12 @@ function SidebarFileTree() {
         </span>
         <IconButton
           icon={<FilePlus size={14} />}
-          onClick={() => createFile({ name: 'untitled.md', parentId: null, type: 'file' })}
+          onClick={() => setNewDialogState({ isOpen: true, type: 'file', parentId: null })}
           title="New file"
         />
         <IconButton
           icon={<FolderPlus size={14} />}
-          onClick={() => createFile({ name: 'New Folder', parentId: null, type: 'folder' })}
+          onClick={() => setNewDialogState({ isOpen: true, type: 'folder', parentId: null })}
           title="New folder"
         />
       </div>
@@ -265,6 +276,13 @@ function SidebarFileTree() {
           />
         ))
       )}
+
+      <NewFileDialog
+        isOpen={newDialogState.isOpen}
+        onClose={() => setNewDialogState(prev => ({ ...prev, isOpen: false }))}
+        type={newDialogState.type}
+        parentId={newDialogState.parentId}
+      />
     </div>
   );
 }
@@ -365,10 +383,24 @@ function FileTreeNode({
         })
     : [];
 
+  const handleRowClick = (e: React.MouseEvent) => {
+    // If the click is a double click, don't trigger the toggle/open action;
+    // let onDoubleClick rename state transition handle it.
+    if (e.detail === 2) {
+      e.stopPropagation();
+      return;
+    }
+    if (isFolder) {
+      onToggleFolder(node.id);
+    } else {
+      onFileClick(node.id);
+    }
+  };
+
   return (
     <div>
       <div
-        onClick={() => (isFolder ? onToggleFolder(node.id) : onFileClick(node.id))}
+        onClick={handleRowClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         draggable
@@ -428,6 +460,7 @@ function FileTreeNode({
             onKeyDown={handleRenameKeyDown}
             autoFocus
             onClick={(e) => e.stopPropagation()}
+            onDoubleClick={(e) => e.stopPropagation()}
             style={{
               flex: 1,
               background: 'var(--bg-tertiary)',
