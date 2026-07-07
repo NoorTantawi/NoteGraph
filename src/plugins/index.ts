@@ -1,12 +1,14 @@
 import { usePluginStore } from '../stores/pluginStore';
 import type { PluginAPI } from '../lib/pluginAPI';
 import { StatsPlugin } from './StatsPlugin';
+import { DailyNotePlugin } from './DailyNotePlugin';
 
 export function initializePlugins() {
   const store = usePluginStore.getState();
 
   const plugins = [
-    StatsPlugin
+    StatsPlugin,
+    DailyNotePlugin,
   ];
 
   plugins.forEach(plugin => {

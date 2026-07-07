@@ -57,6 +57,7 @@ export function Sidebar() {
       <SidebarHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'files' ? (
         <>
+          <WidgetZone name="sidebar-top" />
           <SidebarSearch />
           <SidebarFileTree />
         </>
