@@ -75,7 +75,7 @@ function MainEditorArea() {
 }
 
 export default function App() {
-  const { loadFromStorage, isLoaded } = useFileStore();
+  const { loadFromStorage, isLoaded, error } = useFileStore();
   useTheme(); // Initialize theme listener
 
   // Global modals state
@@ -106,8 +106,6 @@ export default function App() {
   if (!isLoaded) {
     return <div className="flex h-screen items-center justify-center text-[var(--text-secondary)]">Loading NoteGraph...</div>;
   }
-
-  const { error } = useFileStore();
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)]">

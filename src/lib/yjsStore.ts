@@ -13,8 +13,10 @@ export const filesMap = doc.getMap<FileNodeMeta>('files');
 // Persist the document locally to IndexedDB
 export const indexeddbProvider = new IndexeddbPersistence('notegraph-yjs-db', doc);
 
-// Connect to peers via WebRTC using the default public signaling server
-export const webrtcProvider = new WebrtcProvider('notegraph-workspace-alpha', doc);
+// Connect to peers via WebRTC using the public Yjs signaling server
+export const webrtcProvider = new WebrtcProvider('notegraph-workspace-alpha', doc, {
+  signaling: ['wss://signaling.yjs.dev'],
+});
 
 // Debugging helpers
 indexeddbProvider.on('synced', () => {
