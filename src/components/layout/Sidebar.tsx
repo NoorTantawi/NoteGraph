@@ -24,6 +24,7 @@ import { useEditorStore } from '../../stores/editorStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import type { FileNode } from '../../types/file';
 import { SimilarNotes } from '../feature/SimilarNotes';
+import { WidgetZone } from '../ui/WidgetZone';
 
 /* ─────────────────────── Sidebar ─────────────────────── */
 
@@ -62,6 +63,7 @@ export function Sidebar() {
       ) : (
         <SimilarNotes />
       )}
+      <WidgetZone name="sidebar-bottom" />
       <SidebarFooter />
     </aside>
   );

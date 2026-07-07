@@ -14,6 +14,7 @@ import { wikilinkExtension } from '../components/editor/extensions/wikilinks';
 import * as Y from 'yjs';
 import { yCollab } from 'y-codemirror.next';
 import { WebrtcProvider } from 'y-webrtc';
+import { usePluginStore } from '../stores/pluginStore';
 
 interface UseCodeMirrorProps {
   initialValue: string;
@@ -29,6 +30,8 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
   const [view, setView] = useState<EditorView>();
   const themeCompartment = useRef(new Compartment());
   const readOnlyCompartment = useRef(new Compartment());
+  const cmExtensionsCompartment = useRef(new Compartment());
+  const cmExtensions = usePluginStore(state => state.cmExtensions);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -66,6 +69,7 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
         placeholder('Type something brilliant...'),
         EditorView.lineWrapping,
         ...(ytext && provider ? [yCollab(ytext, provider.awareness)] : []),
+        cmExtensionsCompartment.current.of(cmExtensions),
       ],
     });
 
@@ -90,6 +94,15 @@ export function useCodeMirror({ initialValue, onChange, isDark, readOnly = false
       });
     }
   }, [isDark, view]);
+
+  // Update cmExtensions dynamically
+  useEffect(() => {
+    if (view) {
+      view.dispatch({
+        effects: cmExtensionsCompartment.current.reconfigure(cmExtensions)
+      });
+    }
+  }, [cmExtensions, view]);
 
   // Update readOnly dynamically
   useEffect(() => {
