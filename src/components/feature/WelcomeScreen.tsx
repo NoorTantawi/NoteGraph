@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import { useEditorStore } from '../../stores/editorStore';
+import { Kbd } from '../ui/Kbd';
 
 export function WelcomeScreen() {
   const { toggleCommandPalette } = useEditorStore();
@@ -20,15 +21,21 @@ export function WelcomeScreen() {
       <div className="flex flex-col gap-4 max-w-sm w-full text-left">
         <div className="flex justify-between items-center bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border)]">
           <span className="text-sm font-medium">Create new note</span>
-          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)]">Double-click Sidebar</span>
+          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)] flex gap-1">
+            Double-click Sidebar
+          </span>
         </div>
         <div className="flex justify-between items-center bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border)]">
           <span className="text-sm font-medium">Search files</span>
-          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)]">Cmd + P</span>
+          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)] flex gap-1">
+            <Kbd modifier="mod">P</Kbd>
+          </span>
         </div>
         <div className="flex justify-between items-center bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border)]">
           <span className="text-sm font-medium">Toggle Sidebar</span>
-          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)]">Cmd + B</span>
+          <span className="text-xs bg-[var(--bg-tertiary)] px-2 py-1 rounded text-[var(--text-secondary)] font-mono border border-[var(--border)] flex gap-1">
+            <Kbd modifier="mod">B</Kbd>
+          </span>
         </div>
       </div>
       

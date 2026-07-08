@@ -23,7 +23,7 @@ import { useScrollSync } from './hooks/useScrollSync';
 
 function MainEditorArea() {
   const { files, updateContent } = useFileStore();
-  const { activeFileId, openTabs, activeContent } = useEditorStore();
+  const { activeFileId, activeContent } = useEditorStore();
 
   const activeFile = activeFileId ? files[activeFileId] : null;
 
@@ -41,8 +41,8 @@ function MainEditorArea() {
     }
   }, [activeFileId, updateContent]);
 
-  if (openTabs.length === 0 || !activeFile) {
-    return <WelcomeScreen />;
+  if (!activeFile) {
+    return null;
   }
 
   return (
@@ -81,14 +81,19 @@ function MainEditorArea() {
 }
 
 export default function App() {
-  const { loadFromStorage, isLoaded, error } = useFileStore();
+  const { loadFromStorage, isLoaded, error, files } = useFileStore();
   useTheme(); // Initialize theme listener
 
+  // Global modals state
   const { 
     commandPaletteOpen, toggleCommandPalette,
     settingsPanelOpen, toggleSettingsPanel,
     graphViewOpen,
+    openTabs,
+    activeFileId,
   } = useEditorStore();
+
+  const activeFile = activeFileId ? files[activeFileId] : null;
 
   const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
 
@@ -148,7 +153,15 @@ export default function App() {
         ) : (
           <AppShell
             sidebar={<Sidebar />}
-            main={graphViewOpen ? <GraphView /> : <MainEditorArea />}
+            main={
+              graphViewOpen ? (
+                <GraphView />
+              ) : openTabs.length === 0 || !activeFile ? (
+                <WelcomeScreen />
+              ) : (
+                <MainEditorArea />
+              )
+            }
           />
         )}
       </div>
