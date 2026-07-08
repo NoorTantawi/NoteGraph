@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
+  Panel,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
 } from '@xyflow/react';
@@ -13,21 +16,23 @@ import '@xyflow/react/dist/style.css';
 
 import { useFileStore } from '../../stores/fileStore';
 import { useEditorStore } from '../../stores/editorStore';
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, ArrowRight, ArrowDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { FileNodeWidget } from './FileNodeWidget';
+import { getLayoutedElements } from '../../hooks/useAutoLayout';
 
 const nodeTypes = {
   fileNode: FileNodeWidget,
 };
 
-export function GraphView() {
+function GraphViewContent() {
   const { graphViewOpen, toggleGraphView } = useEditorStore();
   const files = useFileStore((s) => s.files);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const { fitView } = useReactFlow();
 
   // Synchronize files from fileStore to React Flow nodes/edges state
   useEffect(() => {
@@ -121,6 +126,15 @@ export function GraphView() {
       };
     });
     setNodes(rearrangedNodes);
+    setTimeout(() => fitView({ duration: 800 }), 50);
+  };
+
+  // Perform automatic layout utilizing Dagre graph engine
+  const handleAutoLayout = (direction: 'TB' | 'LR') => {
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, direction);
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+    setTimeout(() => fitView({ duration: 800 }), 50);
   };
 
   return (
@@ -172,6 +186,26 @@ export function GraphView() {
                   nodeColor="var(--accent-muted)"
                   maskColor="rgba(0, 0, 0, 0.3)"
                 />
+                
+                {/* Auto Layout Action Panel */}
+                <Panel position="top-right" className="flex gap-2 bg-[var(--bg-secondary)] p-2 rounded-lg border border-[var(--border)] shadow-lg glass-surface">
+                  <button
+                    onClick={() => handleAutoLayout('LR')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-xs text-[var(--text-primary)] font-medium transition-colors cursor-pointer border border-[var(--border)]"
+                    title="Layout horizontally"
+                  >
+                    <ArrowRight size={14} className="text-[var(--accent)]" />
+                    Horizontal
+                  </button>
+                  <button
+                    onClick={() => handleAutoLayout('TB')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-xs text-[var(--text-primary)] font-medium transition-colors cursor-pointer border border-[var(--border)]"
+                    title="Layout vertically"
+                  >
+                    <ArrowDown size={14} className="text-[var(--accent)]" />
+                    Vertical
+                  </button>
+                </Panel>
               </ReactFlow>
             </ErrorBoundary>
             
@@ -194,5 +228,17 @@ export function GraphView() {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+export function GraphView() {
+  const { graphViewOpen } = useEditorStore();
+  
+  if (!graphViewOpen) return null;
+
+  return (
+    <ReactFlowProvider>
+      <GraphViewContent />
+    </ReactFlowProvider>
   );
 }
