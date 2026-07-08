@@ -127,11 +127,10 @@ export function GraphView() {
     <AnimatePresence>
       {graphViewOpen && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-primary)]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="w-full h-full flex flex-col bg-[var(--bg-primary)] overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[var(--border)] shrink-0 bg-[var(--bg-secondary)] shadow-sm">

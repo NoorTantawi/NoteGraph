@@ -35,6 +35,12 @@ function MainEditorArea() {
 
   useScrollSync(editorRef, previewRef);
 
+  const handleEditorChange = React.useCallback((newContent: string) => {
+    if (activeFileId) {
+      updateContent(activeFileId, newContent);
+    }
+  }, [activeFileId, updateContent]);
+
   if (openTabs.length === 0 || !activeFile) {
     return <WelcomeScreen />;
   }
@@ -52,7 +58,7 @@ function MainEditorArea() {
             key={activeFile.id}
             fileId={activeFile.id}
             content={activeFile.content}
-            onChange={(newContent) => updateContent(activeFile.id, newContent)}
+            onChange={handleEditorChange}
           />
         </div>
 
@@ -78,10 +84,10 @@ export default function App() {
   const { loadFromStorage, isLoaded, error } = useFileStore();
   useTheme(); // Initialize theme listener
 
-  // Global modals state
   const { 
     commandPaletteOpen, toggleCommandPalette,
     settingsPanelOpen, toggleSettingsPanel,
+    graphViewOpen,
   } = useEditorStore();
 
   const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
@@ -142,7 +148,7 @@ export default function App() {
         ) : (
           <AppShell
             sidebar={<Sidebar />}
-            main={<MainEditorArea />}
+            main={graphViewOpen ? <GraphView /> : <MainEditorArea />}
           />
         )}
       </div>
@@ -150,7 +156,6 @@ export default function App() {
       <CommandPalette isOpen={commandPaletteOpen} onClose={toggleCommandPalette} />
       <SettingsPanel isOpen={settingsPanelOpen} onClose={toggleSettingsPanel} />
       <ExportDialog isOpen={exportDialogOpen} onClose={() => setExportDialogOpen(false)} />
-      <GraphView />
     </div>
   );
 }

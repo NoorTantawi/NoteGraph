@@ -147,10 +147,17 @@ export function useCodeMirror({ fileId, initialValue, onChange, isDark, readOnly
   // We use key={id} on the component to avoid this firing for different files.
   // But if an external process changes the file content, we should update it.
   useEffect(() => {
-    if (!ytext && view && initialValue !== view.state.doc.toString()) {
-      view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: initialValue }
-      });
+    if (!ytext && view) {
+      const currentDoc = view.state.doc.toString();
+      const activeContent = useEditorStore.getState().activeContent;
+      
+      // If the incoming value differs from the view and doesn't match our active local keystroke buffer,
+      // it means an external event (like sync or a plugin) changed the file. We then safely update.
+      if (initialValue !== currentDoc && initialValue !== activeContent) {
+        view.dispatch({
+          changes: { from: 0, to: currentDoc.length, insert: initialValue }
+        });
+      }
     }
   }, [initialValue, view, ytext]);
 
